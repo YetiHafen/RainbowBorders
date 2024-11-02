@@ -142,6 +142,9 @@
   <ItemGroup>
     <ResourceCompile Include="RainbowBorders.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="rainbowborders.manifest" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
