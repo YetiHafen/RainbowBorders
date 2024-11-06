@@ -114,8 +114,11 @@ void changeBorderColor() {
 				for (HWND hWnd : g_windows) {
 					DwmSetWindowAttribute(hWnd, DWMWA_BORDER_COLOR, &color_brg, sizeof(int));
 				}
-			}
-			g_windows = getAllWindows();
+
+				if (hue % 10 == 0) {
+					g_windows = getAllWindows();
+				}
+			}		
 		}
 	}).detach();
 }
