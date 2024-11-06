@@ -53,6 +53,13 @@ LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 BOOL WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int nCmdShow) {
 
+	CreateMutex(NULL, TRUE, TEXT("2a226fe06e5a4697bf21ce88ee4d2b25"));
+
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		MessageBox(NULL, TEXT("Another instance of RainbowBorders is already running"), TEXT("Unable to start"), MB_ICONERROR | MB_OK);
+		return 1;
+	}
+
 	HICON icon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
 
 	registerWndClass(hInstance, icon);
