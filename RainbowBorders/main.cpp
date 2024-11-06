@@ -53,6 +53,7 @@ LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 BOOL WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int nCmdShow) {
 
+	// prevent multiple instances from running in parallel
 	CreateMutex(NULL, TRUE, TEXT("2a226fe06e5a4697bf21ce88ee4d2b25"));
 
 	if (GetLastError() == ERROR_ALREADY_EXISTS) {
@@ -60,6 +61,17 @@ BOOL WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR, 
 		return 1;
 	}
 
+
+	// set low priority and enable efficiency mode
+	SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS);
+	PROCESS_POWER_THROTTLING_STATE powerThrottlingState = { 0 };
+	powerThrottlingState.Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION;
+	powerThrottlingState.ControlMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED;
+	powerThrottlingState.StateMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED;
+	SetProcessInformation(GetCurrentProcess(), ProcessPowerThrottling, &powerThrottlingState, sizeof(powerThrottlingState));
+
+
+	// start application logic
 	HICON icon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
 
 	registerWndClass(hInstance, icon);
