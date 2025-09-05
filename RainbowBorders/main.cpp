@@ -27,18 +27,17 @@ LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_TRAYICON:
 		switch (lParam) {
 		case WM_LBUTTONDOWN:
-			OutputDebugString(L"Click!\n");
-			break;
-
 		case WM_RBUTTONDOWN:
-			HMENU popup = CreatePopupMenu();
-			InsertMenu(popup, 0, MF_BYPOSITION | MF_STRING, IDC_EXIT, TEXT("Exit"));
-			InsertMenu(popup, 0, MF_BYPOSITION | MF_STRING, 2, TEXT("Hi"));
+			HMENU menu = LoadMenu(nullptr, MAKEINTRESOURCE(IDR_TRAY_MENU));
+			HMENU popup = GetSubMenu(menu, 0);
 
 			POINT point;
 			GetCursorPos(&point);
-			BOOL result = TrackPopupMenu(popup, TPM_BOTTOMALIGN | TPM_LEFTALIGN | TPM_RETURNCMD, point.x, point.y, 0, hWnd, NULL);
-			if (result == IDC_EXIT) {
+			SetForegroundWindow(hWnd);
+			UINT hAlign = GetSystemMetrics(SM_MENUDROPALIGNMENT);
+			BOOL result = TrackPopupMenuEx(popup, TPM_BOTTOMALIGN | hAlign | TPM_RETURNCMD, point.x, point.y, hWnd, NULL);
+			DestroyMenu(menu);
+			if (result == ID_TRAYMENU_EXIT) {
 				PostQuitMessage(0);
 				return 0;
 			}
