@@ -17,9 +17,14 @@ BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam);
 void changeBorderColor();
 int hsvToGrb(float h, float s, float v);
 
+struct settings {
+	bool change_captions = false;
+};
+
 
 std::atomic_bool g_running = true;
 std::vector<HWND> g_windows;
+settings g_settings;
 
 LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
@@ -30,6 +35,9 @@ LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		case WM_RBUTTONDOWN:
 			HMENU menu = LoadMenu(nullptr, MAKEINTRESOURCE(IDR_TRAY_MENU));
 			HMENU popup = GetSubMenu(menu, 0);
+			HMENU settings = GetSubMenu(popup, 0);
+			UINT checked = g_settings.change_captions ? MF_CHECKED : MF_UNCHECKED;
+			CheckMenuItem(popup, ID_SETTINGS_CHANGECAPTION, checked);
 
 			POINT point;
 			GetCursorPos(&point);
@@ -37,9 +45,14 @@ LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			UINT hAlign = GetSystemMetrics(SM_MENUDROPALIGNMENT);
 			BOOL result = TrackPopupMenuEx(popup, TPM_BOTTOMALIGN | hAlign | TPM_RETURNCMD, point.x, point.y, hWnd, NULL);
 			DestroyMenu(menu);
-			if (result == ID_TRAYMENU_EXIT) {
+			switch (result) {
+			case ID_TRAYMENU_EXIT:
 				PostQuitMessage(0);
 				return 0;
+				break;
+			case ID_SETTINGS_CHANGECAPTION:
+				g_settings.change_captions = !g_settings.change_captions;
+				break;
 			}
 			break;
 		}
@@ -112,6 +125,9 @@ void changeBorderColor() {
 				int color_brg = hsvToGrb(hue, 1, 1);
 				for (HWND hWnd : g_windows) {
 					DwmSetWindowAttribute(hWnd, DWMWA_BORDER_COLOR, &color_brg, sizeof(int));
+					if (g_settings.change_captions) {
+						DwmSetWindowAttribute(hWnd, DWMWA_CAPTION_COLOR, &color_brg, sizeof(int));
+					}
 				}
 
 				if (hue % 10 == 0) {
